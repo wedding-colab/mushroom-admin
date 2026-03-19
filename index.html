@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MycoMarket – Admin Panel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f5f0e8;
+            margin: 0;
+            padding: 20px;
+        }
+        .login-box {
+            max-width: 350px;
+            margin: 80px auto;
+            background: white;
+            padding: 30px 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-box h2 {
+            color: #3b2a1a;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #ddd;
+            border-radius: 30px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        .login-box input:focus {
+            border-color: #8b6914;
+        }
+        .login-box button {
+            background: #8b6914;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .login-box button:hover {
+            background: #a07a1a;
+        }
+        .error {
+            color: #c4622d;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* Admin panel */
+        .admin-panel {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: #3b2a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header h1 span {
+            background: #8b6914;
+            color: white;
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .refresh-btn {
+            background: #6b7c5c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .refresh-btn:hover {
+            background: #5a6a4c;
+        }
+        .logout-btn {
+            background: #f0ebe0;
+            color: #3b2a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background: #e0d8c8;
+        }
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #3b2a1a;
+        }
+        .auto-refresh input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* Orders table */
+        .table-container {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th {
+            text-align: left;
+            padding: 16px 12px;
+            background: #f9f5ee;
+            color: #3b2a1a;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        tr:hover {
+            background: #fdfaf5;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #d4dbc8;
+            color: #3b2a1a;
+        }
+        .status-badge.pending {
+            background: #ffecb3;
+            color: #7d5d0e;
+        }
+        .payment-method {
+            font-weight: 500;
+        }
+        .items-cell {
+            max-width: 250px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: #5a4530;
+        }
+        .items-cell span {
+            display: inline-block;
+            background: #f0ebe0;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin: 2px 4px 2px 0;
+        }
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b6914;
+        }
+        .error-message {
+            background: #ffebee;
+            color: #c4622d;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginDiv" class="login-box">
+    <h2>🍄 MycoMarket Admin</h2>
+    <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
+    <button onclick="checkPassword()">Login</button>
+    <div id="loginError" class="error"></div>
+</div>
+
+<!-- ADMIN PANEL (hidden until login) -->
+<div id="adminPanel" class="admin-panel">
+    <div class="header">
+        <h1>
+            🍄 Orders
+            <span id="orderCount">0</span>
+        </h1>
+        <div class="header-right">
+            <div class="auto-refresh">
+                <label for="autoRefreshCheck">Auto‑refresh (10s)</label>
+                <input type="checkbox" id="autoRefreshCheck" checked>
+            </div>
+            <button class="refresh-btn" onclick="fetchOrders()">
+                🔄 Refresh Now
+            </button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div id="errorDisplay" class="error-message" style="display: none;"></div>
+
+    <div class="table-container">
+        <div id="ordersTable">
+            <div class="loading">Loading orders...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // CONFIGURATION – CHANGE THESE!
+    // ============================================================
+    const ADMIN_PASSWORD = "Bhushan@10";      // 🔐 Set your own password
+    const SUPABASE_URL = 'https://ekxyvuvmuhzhgzslefys.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVreHl2dXZtdWh6aGd6c2xlZnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MDY5ODksImV4cCI6MjA4OTQ4Mjk4OX0.xLUbGWONyUfPESMAyScxTNnnel4nQznOY23gBBw1zNI';
+
+    // ============================================================
+    // GLOBAL VARIABLES
+    // ============================================================
+    let autoRefreshTimer = null;
+
+    // ============================================================
+    // LOGIN / LOGOUT
+    // ============================================================
+    function checkPassword() {
+        const pw = document.getElementById('passwordInput').value;
+        if (pw === ADMIN_PASSWORD) {
+            document.getElementById('loginDiv').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('loginError').textContent = '';
+            // Start auto-refresh if checkbox is checked
+            if (document.getElementById('autoRefreshCheck').checked) {
+                startAutoRefresh();
+            }
+            fetchOrders(); // initial load
+        } else {
+            document.getElementById('loginError').textContent = 'Incorrect password';
+        }
+    }
+
+    function logout() {
+        // Clear timer and hide panel
+        stopAutoRefresh();
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('loginDiv').style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('loginError').textContent = '';
+    }
+
+    // ============================================================
+    // AUTO-REFRESH HANDLING
+    // ============================================================
+    function startAutoRefresh() {
+        if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+        autoRefreshTimer = setInterval(() => {
+            fetchOrders(true); // silent refresh (no loading indicator)
+        }, 10000); // every 10 seconds
+    }
+
+    function stopAutoRefresh() {
+        if (autoRefreshTimer) {
+            clearInterval(autoRefreshTimer);
+            autoRefreshTimer = null;
+        }
+    }
+
+    // When checkbox changes, update auto-refresh
+    document.getElementById('autoRefreshCheck').addEventListener('change', function(e) {
+        if (this.checked) {
+            startAutoRefresh();
+        } else {
+            stopAutoRefresh();
+        }
+    });
+
+    // ============================================================
+    // FETCH ORDERS FROM SUPABASE
+    // ============================================================
+    async function fetchOrders(silent = false) {
+        const errorDiv = document.getElementById('errorDisplay');
+        const tableDiv = document.getElementById('ordersTable');
+
+        if (!silent) {
+            tableDiv.innerHTML = '<div class="loading">Loading orders...</div>';
+        }
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?order=created_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+
+            const orders = await res.json();
+            displayOrders(orders);
+            errorDiv.style.display = 'none';
+        } catch (err) {
+            console.error('Fetch error:', err);
+            errorDiv.style.display = 'block';
+            errorDiv.textContent = '❌ Failed to load orders. ' + err.message;
+            if (!silent) {
+                tableDiv.innerHTML = `<div class="no-orders">Could not load orders. Click refresh to try again.</div>`;
+            }
+        }
+    }
+
+    // ============================================================
+    // DISPLAY ORDERS IN TABLE
+    // ============================================================
+    function displayOrders(orders) {
+        const tableDiv = document.getElementById('ordersTable');
+        document.getElementById('orderCount').textContent = orders.length;
+
+        if (!orders || orders.length === 0) {
+            tableDiv.innerHTML = '<div class="no-orders">✨ No orders yet. Check back later!</div>';
+            return;
+        }
+
+        let html = `<table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date & Time</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        orders.forEach(o => {
+            // Format date nicely
+            const created = new Date(o.created_at);
+            const dateStr = created.toLocaleDateString() + ' ' + created.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            // Build items summary
+            let itemsHtml = '';
+            if (o.items && Array.isArray(o.items)) {
+                o.items.forEach(item => {
+                    itemsHtml += `<span>${item.icon || '🍄'} ${item.name} ×${item.qty}</span> `;
+                });
+            } else {
+                itemsHtml = '–';
+            }
+
+            // Status badge class
+            const statusClass = (o.status || '').toLowerCase() === 'pending' ? 'pending' : '';
+
+            html += `<tr>
+                <td><strong>${o.order_id || '–'}</strong></td>
+                <td>${dateStr}</td>
+                <td>${o.customer_name || ''}</td>
+                <td>${o.phone || ''}</td>
+                <td style="max-width:200px;">${o.address || ''}, ${o.city || ''} ${o.pin || ''}</td>
+                <td class="items-cell">${itemsHtml}</td>
+                <td><strong>₹${o.total || 0}</strong></td>
+                <td class="payment-method">${o.payment_method || ''}</td>
+                <td><span class="status-badge ${statusClass}">${o.status || 'pending'}</span></td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        tableDiv.innerHTML = html;
+    }
+
+    // Optional: handle Enter key on login
+    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') checkPassword();
+    });
+</script>
+
+<!-- ============================================================
+     IMPORTANT: Make sure your Supabase table "orders" exists 
+     and the anon key has SELECT permission. 
+     Run this SQL in your Supabase SQL editor:
+
+     CREATE POLICY "anon_select" ON orders FOR SELECT TO anon USING (true);
+     ============================================================ -->
+</body>
+</html>
