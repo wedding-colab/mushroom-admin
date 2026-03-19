@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>MycoMarket – Admin Panel</title>
     <style>
         * {
@@ -12,11 +12,12 @@
         body {
             background: #f5f0e8;
             margin: 0;
-            padding: 20px;
+            padding: 12px; /* reduced for mobile, increased on larger screens */
         }
+        /* Login box – already decent on mobile */
         .login-box {
             max-width: 350px;
-            margin: 80px auto;
+            margin: 40px auto;
             background: white;
             padding: 30px 25px;
             border-radius: 16px;
@@ -27,12 +28,13 @@
             color: #3b2a1a;
             margin-bottom: 20px;
             font-weight: 500;
+            font-size: 1.5rem;
         }
         .login-box input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 16px; /* larger touch target */
             border: 1.5px solid #ddd;
-            border-radius: 30px;
+            border-radius: 40px;
             font-size: 1rem;
             margin-bottom: 20px;
             outline: none;
@@ -44,9 +46,9 @@
             background: #8b6914;
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 1rem;
+            padding: 14px 25px;
+            border-radius: 40px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
@@ -72,14 +74,16 @@
             align-items: center;
             justify-content: space-between;
             background: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            margin-bottom: 25px;
+            padding: 15px 20px;
+            border-radius: 30px;
+            margin-bottom: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            flex-wrap: wrap;       /* allow wrapping on mobile */
+            gap: 15px;
         }
         .header h1 {
             margin: 0;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             color: #3b2a1a;
             display: flex;
             align-items: center;
@@ -91,17 +95,19 @@
             font-size: 0.9rem;
             padding: 4px 12px;
             border-radius: 50px;
+            white-space: nowrap;
         }
         .header-right {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .refresh-btn {
             background: #6b7c5c;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 40px;
             font-size: 0.95rem;
             font-weight: 500;
@@ -110,6 +116,7 @@
             align-items: center;
             gap: 6px;
             transition: background 0.2s;
+            white-space: nowrap;
         }
         .refresh-btn:hover {
             background: #5a6a4c;
@@ -118,12 +125,13 @@
             background: #f0ebe0;
             color: #3b2a1a;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 40px;
             font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
             transition: background 0.2s;
+            white-space: nowrap;
         }
         .logout-btn:hover {
             background: #e0d8c8;
@@ -131,39 +139,42 @@
         .auto-refresh {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-size: 0.9rem;
             color: #3b2a1a;
+            white-space: nowrap;
         }
         .auto-refresh input {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
         }
 
-        /* Orders table */
+        /* Orders table – make it scrollable horizontally */
         .table-container {
             background: white;
             border-radius: 24px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            overflow-x: auto;
+            overflow-x: auto;      /* horizontal scroll on small screens */
+            -webkit-overflow-scrolling: touch;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.85rem;    /* slightly smaller on mobile, still readable */
+            min-width: 800px;       /* forces scroll on narrow screens */
         }
         th {
             text-align: left;
-            padding: 16px 12px;
+            padding: 12px 8px;
             background: #f9f5ee;
             color: #3b2a1a;
             font-weight: 600;
             white-space: nowrap;
         }
         td {
-            padding: 14px 12px;
+            padding: 12px 8px;
             border-bottom: 1px solid #eee;
             vertical-align: top;
         }
@@ -174,11 +185,12 @@
             display: inline-block;
             padding: 4px 10px;
             border-radius: 50px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             background: #d4dbc8;
             color: #3b2a1a;
+            white-space: nowrap;
         }
         .status-badge.pending {
             background: #ffecb3;
@@ -186,19 +198,21 @@
         }
         .payment-method {
             font-weight: 500;
+            white-space: nowrap;
         }
         .items-cell {
-            max-width: 250px;
-            font-size: 0.8rem;
-            line-height: 1.5;
+            max-width: 200px;
+            font-size: 0.75rem;
+            line-height: 1.4;
             color: #5a4530;
         }
         .items-cell span {
             display: inline-block;
             background: #f0ebe0;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 30px;
             margin: 2px 4px 2px 0;
+            white-space: nowrap;
         }
         .no-orders {
             text-align: center;
@@ -218,6 +232,37 @@
             border-radius: 12px;
             margin-bottom: 20px;
             text-align: center;
+        }
+
+        /* Larger screens (tablet/desktop) */
+        @media (min-width: 600px) {
+            body {
+                padding: 20px;
+            }
+            .header {
+                padding: 15px 25px;
+                flex-wrap: nowrap;
+            }
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            .header-right {
+                gap: 12px;
+            }
+            .table-container {
+                padding: 20px;
+            }
+            table {
+                font-size: 0.9rem;
+                min-width: 1000px;   /* a bit wider for desktop */
+            }
+            th, td {
+                padding: 16px 12px;
+            }
+            .items-cell {
+                max-width: 250px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -240,11 +285,11 @@
         </h1>
         <div class="header-right">
             <div class="auto-refresh">
-                <label for="autoRefreshCheck">Auto‑refresh (10s)</label>
+                <label for="autoRefreshCheck">Auto</label>
                 <input type="checkbox" id="autoRefreshCheck" checked>
             </div>
             <button class="refresh-btn" onclick="fetchOrders()">
-                🔄 Refresh Now
+                🔄 Refresh
             </button>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
@@ -263,7 +308,7 @@
     // ============================================================
     // CONFIGURATION – CHANGE THESE!
     // ============================================================
-    const ADMIN_PASSWORD = "Bhushan@10";      // 🔐 Set your own password
+    const ADMIN_PASSWORD = "mycomarket123";      // 🔐 Set your own password
     const SUPABASE_URL = 'https://ekxyvuvmuhzhgzslefys.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVreHl2dXZtdWh6aGd6c2xlZnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MDY5ODksImV4cCI6MjA4OTQ4Mjk4OX0.xLUbGWONyUfPESMAyScxTNnnel4nQznOY23gBBw1zNI';
 
