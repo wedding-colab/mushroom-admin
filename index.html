@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>MycoMarket – Admin Panel</title>
     <style>
-        /* (same styles as before, keep unchanged) */
+        /* (same styles as before – unchanged) */
         * {
             box-sizing: border-box;
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -275,20 +275,21 @@
 <script>
     // ========== CONFIGURATION ==========
     const ADMIN_PASSWORD = "Bhushan@10";
-    const SUPABASE_URL = 'https://ekxyvuvmuhzhgzslefys.supabase.co'; // Use your correct URL
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVreHl2dXZtdWh6aGd6c2xlZnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MDY5ODksImV4cCI6MjA4OTQ4Mjk4OX0.xLUbGWONyUfPESMAyScxTNnnel4nQznOY23gBBw1zNI'; // REPLACE WITH YOUR NEW ANON KEY
+    const SUPABASE_URL = 'https://ekxyvuvmuhzhgzslefys.supabase.co'; // <- change if using another project
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVreHl2dXZtdWh6aGd6c2xlZnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MDY5ODksImV4cCI6MjA4OTQ4Mjk4OX0.xLUbGWONyUfPESMAyScxTNnnel4nQznOY23gBBw1zNI';
+    const STORAGE_BUCKET = 'Products';   // <-- IMPORTANT: use EXACT bucket name (case-sensitive)
 
     // Global variables
     let supabaseClient = null;
     let products = [];
 
-    // Wait for Supabase library to load before creating client
+    // Wait for Supabase library to load
     function initSupabase() {
         if (typeof supabase !== 'undefined' && supabase.createClient) {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log('Supabase client initialized');
+            console.log('✅ Supabase client initialized');
         } else {
-            console.error('Supabase library not loaded yet, retrying...');
+            console.warn('⏳ Supabase library not loaded, retrying...');
             setTimeout(initSupabase, 100);
         }
     }
@@ -341,7 +342,7 @@
                 container.innerHTML = '<div class="no-orders">✨ No orders yet.</div>';
                 return;
             }
-            let html = `<table><thead><tr>
+            let html = ` <table><thead><tr>
                 <th>Order ID</th><th>Date</th><th>Customer</th><th>Phone</th><th>Address</th>
                 <th>Items</th><th>Total</th><th>Payment</th><th>Status</th>
             </tr></thead><tbody>`;
@@ -407,15 +408,21 @@
         }
     }
 
-    // Upload image to Supabase Storage
+    // Upload image to Supabase Storage (using the correct bucket name)
     async function uploadImage(file) {
         if (!supabaseClient) {
             throw new Error('Supabase client not ready. Please refresh and try again.');
         }
+        // Use the exact bucket name from configuration
+        const bucket = supabaseClient.storage.from(STORAGE_BUCKET);
         const fileName = `${Date.now()}_${file.name}`;
-        const { data, error } = await supabaseClient.storage.from('products').upload(fileName, file);
-        if (error) throw error;
-        const { data: publicUrlData } = supabaseClient.storage.from('products').getPublicUrl(fileName);
+        console.log(`📤 Uploading to bucket "${STORAGE_BUCKET}": ${fileName}`);
+        const { data, error } = await bucket.upload(fileName, file);
+        if (error) {
+            console.error('Upload error:', error);
+            throw error;
+        }
+        const { data: publicUrlData } = bucket.getPublicUrl(fileName);
         return publicUrlData.publicUrl;
     }
 
@@ -439,7 +446,7 @@
                 imageUrl = await uploadImage(fileInput.files[0]);
                 document.getElementById('prodImageUrl').value = imageUrl; // update field
             } catch (err) {
-                alert('Image upload failed: ' + err.message);
+                alert(`Image upload failed: ${err.message}\n\nCheck bucket name and policies.`);
                 return;
             }
         }
@@ -464,8 +471,11 @@
                 },
                 body: JSON.stringify(productData)
             });
-            if (!res.ok) throw new Error(await res.text());
-            alert(id ? 'Product updated!' : 'Product added!');
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText);
+            }
+            alert(id ? '✅ Product updated!' : '✅ Product added!');
             resetForm();
             loadProducts();
         } catch (err) {
@@ -485,7 +495,6 @@
         document.getElementById('prodFeatured').checked = product.featured || false;
         document.getElementById('prodDesc').value = product.description || '';
         document.getElementById('prodImageUrl').value = product.image_url || '';
-        // Scroll to form
         document.querySelector('.product-form').scrollIntoView({ behavior: 'smooth' });
     }
 
